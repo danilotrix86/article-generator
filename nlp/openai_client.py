@@ -2,12 +2,13 @@ from openai import OpenAI
 from config import config 
 
 class OpenAIClient:
-    def __init__(self, model, temperature, json_object):
+    def __init__(self, model, temperature, json_object, max_tokens=500):
         
         self.messages = []
         self.client = OpenAI(api_key=config.OPENAI_API_KEY)
         self.model = model
         self.temperature = temperature
+        self.max_tokens = max_tokens
         if json_object:
             self.response_format = {"type": "json_object"}
         else:
@@ -19,7 +20,8 @@ class OpenAIClient:
             model=self.model,
             temperature=self.temperature,
             response_format=self.response_format,
-            messages=self.messages
+            messages=self.messages,
+            max_tokens=self.max_tokens
         )
     
         return response.choices[0].message.content, response.usage

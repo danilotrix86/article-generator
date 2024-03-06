@@ -1,7 +1,6 @@
 from nlp.openai_client import OpenAIClient
+import json
 
-
-# Find topics starting from the keywords
 keywords = "Cosa vedere a Marina di Ragusa, Marina di Ragusa, Ragusa mare"
 topics_n = 5
 language = "italiano"
@@ -35,15 +34,28 @@ Return a json structure like this:
     relevant_trends
 }}
 
-IMPORTANT: The json structure should be written using the language: {language}*
+
 
 '''
 
-client = OpenAIClient("gpt-3.5-turbo", 0, True)
-client.add_to_message(prompt, "user")
+json_structure = OpenAIClient("gpt-3.5-turbo", 0, True, 100)
+
+json_structure.add_to_message(prompt, "user")
 
 
-answer, tokens = (client.completions())
+minchia, cazzi = (json_structure.completions())
+
+minchia_json = json.loads(minchia)
+
+minchia_json.pop("title", None)
+
+print (minchia_json.pop("topic", None))
+
+
+json_structure.messages  = []
+json_structure.add_to_message(f"write a short article using this json structure {minchia_json} ", "user")
+answer, usage = json_structure.completions()
 
 print (answer)
-print (tokens.prompt_tokens, tokens.total_tokens)
+
+
