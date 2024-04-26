@@ -3,6 +3,7 @@ from base64 import b64encode
 from json import loads
 from json import dumps
 from config import config
+from nlp.openai_client import OpenAIClient
 
 class RestClient:
     domain = "api.dataforseo.com"
@@ -64,3 +65,19 @@ def keyword_research(keyword, language, location):
 
         # Now 'keywords_with_related' contains all the primary keywords and their related keywords
         return keywords_with_related
+
+def better_keyword_research(list_of_keywords, keyword):
+    oa = OpenAIClient(config.OPENAI_LLM_BEST_MODEL, 0, True)
+
+    list_of_keywords_str = str(list_of_keywords)
+
+    better_keyword_prompt = f'''
+        Given the main keyword "{keyword}", and a list of potential related keywords, select keywords from this list that can be used to expand on the topic in a single comprehensive article. Output the selected keywords in JSON format.
+        Ensure that the selected keywords are diverse and cover different aspects or details about the topic, suitable for creating sections within the article. Match the search intent of the main keyword, focusing on what users are most likely to seek regarding this topic.
+        Exclude any repetitive or overly similar variations of the keyword that wouldn't add significant new information or perspective to the article.
+    '''
+
+    oa.add_to_message(better_keyword_prompt, 'system')
+    oa.add_to_message(list_of_keywords_str, 'user')
+
+    return oa.completions()
